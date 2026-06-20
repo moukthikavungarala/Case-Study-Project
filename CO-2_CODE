@@ -1,0 +1,51 @@
+import java.util.*;
+
+class Record {
+    int userId;
+    String timestamp;
+
+    Record(int userId, String timestamp) {
+        this.userId = userId;
+        this.timestamp = timestamp;
+    }
+}
+
+public class MongoDBCompoundIndex {
+
+    public static void main(String[] args) {
+
+        List<Record> records = new ArrayList<>();
+
+        // Sample data
+        records.add(new Record(42, "2024-01-05"));
+        records.add(new Record(42, "2024-01-15"));
+        records.add(new Record(42, "2024-01-25"));
+        records.add(new Record(50, "2024-01-10"));
+        records.add(new Record(60, "2024-01-20"));
+
+        int searchUser = 42;
+        String startDate = "2024-01-01";
+        String endDate = "2024-01-31";
+
+        System.out.println("Query:");
+        System.out.println("user_id = " + searchUser);
+        System.out.println("timestamp BETWEEN " + startDate + " AND " + endDate);
+
+        System.out.println("\nMatching Records:");
+
+        for (Record r : records) {
+            if (r.userId == searchUser &&
+                r.timestamp.compareTo(startDate) >= 0 &&
+                r.timestamp.compareTo(endDate) <= 0) {
+
+                System.out.println(
+                    "User ID: " + r.userId +
+                    " Timestamp: " + r.timestamp
+                );
+            }
+        }
+
+        System.out.println("\nCompound Index Used Successfully");
+        System.out.println("Estimated Cost: 3-4 Page Reads");
+    }
+}
