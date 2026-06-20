@@ -1,0 +1,79 @@
+ import java.util.*;
+
+public class EdmondsKarp {
+
+    static final int V = 6; // S, A, B, C, D, T
+
+    boolean bfs(int[][] residualGraph, int s, int t, int[] parent) {
+        boolean[] visited = new boolean[V];
+
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(s);
+        visited[s] = true;
+        parent[s] = -1;
+
+        while (!queue.isEmpty()) {
+            int u = queue.poll();
+
+            for (int v = 0; v < V; v++) {
+                if (!visited[v] && residualGraph[u][v] > 0) {
+                    queue.add(v);
+                    parent[v] = u;
+                    visited[v] = true;
+                }
+            }
+        }
+
+        return visited[t];
+    }
+
+    int maxFlow(int[][] graph, int source, int sink) {
+        int[][] residualGraph = new int[V][V];
+
+        for (int i = 0; i < V; i++)
+            for (int j = 0; j < V; j++)
+                residualGraph[i][j] = graph[i][j];
+
+        int[] parent = new int[V];
+        int maxFlow = 0;
+
+        while (bfs(residualGraph, source, sink, parent)) {
+
+            int pathFlow = Integer.MAX_VALUE;
+
+            for (int v = sink; v != source; v = parent[v]) {
+                int u = parent[v];
+                pathFlow = Math.min(pathFlow, residualGraph[u][v]);
+            }
+
+            for (int v = sink; v != source; v = parent[v]) {
+                int u = parent[v];
+                residualGraph[u][v] -= pathFlow;
+                residualGraph[v][u] += pathFlow;
+            }
+
+            maxFlow += pathFlow;
+        }
+
+        return maxFlow;
+    }
+
+    public static void main(String[] args) {
+
+        int[][] graph = {
+            //S  A  B  C  D  T
+            {0,10,10,0,0,0},   // S
+            {0,0,0,4,8,0},     // A
+            {0,0,0,9,0,0},     // B
+            {0,0,0,0,6,10},    // C
+            {0,0,0,0,0,10},    // D
+            {0,0,0,0,0,0}      // T
+        };
+
+        EdmondsKarp ek = new EdmondsKarp();
+
+        int result = ek.maxFlow(graph, 0, 5);
+
+        System.out.println("Maximum Flow = " + result + " KL/hour");
+    }
+}
