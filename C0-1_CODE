@@ -1,0 +1,119 @@
+class AVLNode {
+    long timestamp;
+    int height;
+    AVLNode left, right;
+
+    AVLNode(long timestamp) {
+        this.timestamp = timestamp;
+        height = 1;
+    }
+}
+
+class AVLTree {
+    AVLNode root;
+
+    int height(AVLNode node) {
+        return (node == null) ? 0 : node.height;
+    }
+
+    int getBalance(AVLNode node) {
+        return (node == null) ? 0 : height(node.left) - height(node.right);
+    }
+
+    AVLNode rightRotate(AVLNode y) {
+        AVLNode x = y.left;
+        AVLNode T2 = x.right;
+
+        x.right = y;
+        y.left = T2;
+
+        y.height = Math.max(height(y.left), height(y.right)) + 1;
+        x.height = Math.max(height(x.left), height(x.right)) + 1;
+
+        return x;
+    }
+
+    AVLNode leftRotate(AVLNode x) {
+        AVLNode y = x.right;
+        AVLNode T2 = y.left;
+
+        y.left = x;
+        x.right = T2;
+
+        x.height = Math.max(height(x.left), height(x.right)) + 1;
+        y.height = Math.max(height(y.left), height(y.right)) + 1;
+
+        return y;
+    }
+
+    AVLNode insert(AVLNode node, long timestamp) {
+
+        if (node == null)
+            return new AVLNode(timestamp);
+
+        if (timestamp < node.timestamp)
+            node.left = insert(node.left, timestamp);
+        else if (timestamp > node.timestamp)
+            node.right = insert(node.right, timestamp);
+        else
+            return node;
+
+        node.height = 1 + Math.max(height(node.left), height(node.right));
+
+        int balance = getBalance(node);
+
+        // LL
+        if (balance > 1 && timestamp < node.left.timestamp)
+            return rightRotate(node);
+
+        // RR
+        if (balance < -1 && timestamp > node.right.timestamp)
+            return leftRotate(node);
+
+        // LR
+        if (balance > 1 && timestamp > node.left.timestamp) {
+            node.left = leftRotate(node.left);
+            return rightRotate(node);
+        }
+
+        // RL
+        if (balance < -1 && timestamp < node.right.timestamp) {
+            node.right = rightRotate(node.right);
+            return leftRotate(node);
+        }
+
+        return node;
+    }
+
+    long findOldestReceipt() {
+        AVLNode current = root;
+
+        while (current.left != null)
+            current = current.left;
+
+        return current.timestamp;
+    }
+}
+
+public class WhatsAppReceiptsAVL {
+    public static void main(String[] args) {
+
+        AVLTree tree = new AVLTree();
+
+        // Sample timestamps inserted in increasing order
+        long[] timestamps = {
+                1001, 1002, 1003, 1004, 1005,
+                1006, 1007, 1008, 1009, 1010
+        };
+
+        for (long ts : timestamps) {
+            tree.root = tree.insert(tree.root, ts);
+        }
+
+        System.out.println("Oldest Pending Receipt Timestamp: "
+                + tree.findOldestReceipt());
+
+        System.out.println("AVL Tree Height: "
+                + tree.root.height);
+    }
+}
